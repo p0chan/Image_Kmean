@@ -16,28 +16,48 @@ from matplotlib.ticker import LinearLocator, FormatStrFormatter
 import Tkinter as Tk
 from tkinter import filedialog
 
+flagSimg=1
+flagSplt=0
+
+
+
+
 
 def func_KMeans_HSV(K,HSV,height,width):
-    img_out = np.zeros((jpgheight, jpgwidth, 3), np.uint8)
-    HSV_KMeans = np.zeros((jpgheight * jpgwidth, 3), np.float)
+    global flagSimg
+    HSV_KMeans = np.zeros((jpgheight , jpgwidth, 3), np.float)
 
     est = KMeans(n_clusters=K)
     est.fit(HSV)
     labels = est.labels_
     CC = est.cluster_centers_
-
     Lb2.delete(0, Lb2.size())
+
     for x in range(0, len(CC)):
-        Lb2.insert(x,CC[x])
+        str = (' {0:8.3f} , {1:>8.3f} , {2:>8.3f} '.format(CC[x][0], CC[x][1], CC[x][2]))
+        Lb2.insert(x, str)
 
     for y in range(0, height):
         for x in range(0, width):
-            HSV_KMeans[x + (y * width)] = CC[labels[x + (y * width)]]
-            rgbVal = hsv2rgb(HSV_KMeans[x + (y * width), 0], HSV_KMeans[x + (y * width), 1],
-                             HSV_KMeans[x + (y * width), 2])
-            img_out[y, x] = rgbVal
-    cv2.imshow("img_Out", img_out)
+            HSV_KMeans[y,x] = CC[labels[x + (y * width)]]
+            #print HSV_KMeans[y,x],CC[labels[x + (y * width)]]
 
+    if flagSimg == 1 :
+        func_Show_Img_FromHSV(HSV_KMeans,width,height)
+    if flagSplt == 1 :
+        func_Show_Plt(HSV_KMeans,width,height)
+
+
+def func_Show_Img_FromHSV(HSV, width,height):
+    img_out = np.zeros((jpgheight, jpgwidth, 3), np.uint8)
+    for y in range(0, height):
+        for x in range(0, width):
+            img_out[y, x] = hsv2rgb(HSV[y, x,0],HSV[y, x,1],HSV[y, x,2])
+    cv2.imshow("Target", img_out)
+    cv2.imshow("original", img_Org)
+
+def func_Show_Plt(HSV, width,height):
+    print "ggg"
 
 
 
@@ -50,14 +70,12 @@ def Cal_Hsv():
         K = int(t)
         func_KMeans_HSV(K,HSV,jpgheight,jpgwidth)
 
-def Show_Col_plt():
-    print "ddd"
-
 def Check_ChkBtn():
-    str = ''
-    if cVar1.get() == 1:
-            str = str + 'GPIO 1 clicked, '
-
+    global flagSimg
+    global flagSplt
+    flagSimg = cVar1.get()
+    flagSplt = cVar2.get()
+    #print flagSimg,flagSplt
 
 
 """"""
@@ -85,7 +103,6 @@ HSV_uniq = np.zeros((len(df2), 3), np.float)
 HSV_uniq[:, 0] = df2["H"]
 HSV_uniq[:, 1] = df2["S"]
 HSV_uniq[:, 2] = df2["V"]
-
 print "File Ready Ok"
 
 
@@ -96,42 +113,51 @@ CTL.title("image K mean")
 lbl = Tk.Label(CTL, text="K Cnt", bg="red", fg="white", width = 5, height = 1)
 lbl.place(y=5,x=5)
 
-
 txt = Tk.Entry(CTL, width = 5)
 txt.place(y=5,x=50)
-txt.insert(0, len(HSV_uniq))
+#txt.insert(0, len(HSV_uniq))
+txt.insert(0, 15)
 
 btn = Tk.Button(CTL, text = "K-Mean Cal Of HSV",  command = Cal_Hsv , width = 20, height = 1)
 btn.place(y=4,x=90)
 
 cVar1 = Tk.IntVar()
-c1 = Tk.Checkbutton(CTL, text="Show img", variable = cVar1)
+c1 = Tk.Checkbutton(CTL, text="Show img", variable = cVar1 , command = Check_ChkBtn)
 c1.select()
-c1.place(y=4,x=240)
+c1.place(y=5,x=240)
 
 cVar2 = Tk.IntVar()
-c2 = Tk.Checkbutton(CTL, text="Show plt", variable = cVar2)
+c2 = Tk.Checkbutton(CTL, text="Show plt", variable = cVar2 , command = Check_ChkBtn)
 #c2.select()
-c2.place(y=4,x=320)
-
-"""
-btn3 = Tk.Button(CTL, text = "Show color plt", command = Show_Col_plt)
-btn3.grid(row=1, column=2)
+c2.place(y=25,x=240)
 
 
-Lb1 = Tk.Listbox(CTL,width=40)
-Lb1.grid(row=3, column=0 )
+Lb1 = Tk.Listbox(CTL,width=22 )
+Lb1.place(y=50,x=5)
+Lb1.update()
+scrollbar = Tk.Scrollbar(Lb1)
+scrollbar.place(y=0,x=Lb1.winfo_width()-20, height=Lb1.winfo_height()-1)
+scrollbar.config( command = Lb1.yview )
+Lb1.config(yscrollcommand=scrollbar.set)
+
+
 for x in range(0, len(HSV_uniq)):
-    Lb1.insert(x, HSV_uniq[x])
+    str = (' {0:8.1f} , {1:>8.1f} , {2:>8.1f} '.format(HSV_uniq[x][0],HSV_uniq[x][1],HSV_uniq[x][2]))
+    Lb1.insert(x, str)
+
 
 Lb2 = Tk.Listbox(CTL,width=40)
-Lb2.grid(row=3, column=1 )
+Lb2.place(y=50,x=240)
+Lb2.update()
+scrollbar2 = Tk.Scrollbar(Lb2)
+scrollbar2.place(y=0,x=Lb2.winfo_width()-20, height=Lb2.winfo_height()-1)
+scrollbar2.config( command = Lb2.yview )
 
 
 print "Go loof"
 txt.focus_set()
-"""
-w = 400 # width for the Tk root
+""""""
+w = 600 # width for the Tk root
 h = 500 # height for the Tk root
 ws = CTL.winfo_screenwidth() # width of the screen
 hs = CTL.winfo_screenheight() # height of the screen
