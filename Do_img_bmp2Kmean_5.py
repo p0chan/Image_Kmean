@@ -41,23 +41,6 @@ def func_KMeans_HSV(K,HSV,height,width):
 
 
 
-def func_KMeans_RGB(K,RGB,height,width):
-    """
-    img_out = np.zeros((jpgheight, jpgwidth, 3), np.uint8)
-    RGB_KMeans = np.zeros((jpgheight * jpgwidth, 3), np.float)
-    est = KMeans(n_clusters=K)
-    est.fit(RGB)
-    labels = est.labels_
-    CC = est.cluster_centers_
-    for y in range(0, height):
-        for x in range(0, width):
-            RGB_KMeans[x + (y * width)] = CC[labels[x + (y * width)]]
-            rgbVal = hsv2rgb(RGB_KMeans[x + (y * width), 0], RGB_KMeans[x + (y * width), 1],
-                             RGB_KMeans[x + (y * width), 2])
-            img_out[y, x] = rgbVal
-    cv2.imshow("img_Out", img_out)
-    """
-
 def Cal_Hsv():
     global jpgheight
     global jpgwidth
@@ -67,20 +50,13 @@ def Cal_Hsv():
         K = int(t)
         func_KMeans_HSV(K,HSV,jpgheight,jpgwidth)
 
-def Cal_Rgb():
-    global jpgheight
-    global jpgwidth
-    global img_Org
-    global RGB
-    t = txt.get()
-    if len(t):
-        K = int(t)
-        func_KMeans_RGB(K,RGB,jpgheight,jpgwidth)
-
-def Show_Col_Info():
+def Show_Col_plt():
     print "ddd"
 
-
+def Check_ChkBtn():
+    str = ''
+    if cVar1.get() == 1:
+            str = str + 'GPIO 1 clicked, '
 
 
 
@@ -117,54 +93,30 @@ print "File Ready Ok"
 CTL = Tk.Tk()
 CTL.title("image K mean")
 
-lbl = Tk.Label(CTL, text="K")
-lbl.grid(row=0, column=0)
-txt = Tk.Entry(CTL)
-txt.grid(row=0, column=1)
-label = Tk.Label(text = 'Colcor Count')
-label.grid(row = 0,column = 2)
+lbl = Tk.Label(CTL, text="K Cnt", bg="red", fg="white", width = 5, height = 1)
+lbl.place(y=5,x=5)
 
 
+txt = Tk.Entry(CTL, width = 5)
+txt.place(y=5,x=50)
+txt.insert(0, len(HSV_uniq))
 
-btn = Tk.Button(CTL, text = "K-Mean Cal HSV",  command = Cal_Hsv)
-btn.grid(row=1, column=1)
-btn2 = Tk.Button(CTL, text = "K-Mean Cal RGB",  command = Cal_Rgb)
-btn2.grid(row=1, column=2)
-btn3 = Tk.Button(CTL, text = "Show color List", command = Show_Col_Info)
-btn3.grid(row=1, column=3)
-
-
-def Check_ChkBtn():
-    str = ''
-    if cVar1.get() == 1:
-            str = str + 'GPIO 1 clicked, '
-    if cVar2.get() == 1:
-            str = str + 'GPIO 2 clicked, '
-    if cVar3.get() == 1:
-            str = str + 'GPIO 3 clicked, '
-    if str == '':
-            str = "nothing was checked"
-    print "Button Clicked", str
+btn = Tk.Button(CTL, text = "K-Mean Cal Of HSV",  command = Cal_Hsv , width = 20, height = 1)
+btn.place(y=4,x=90)
 
 cVar1 = Tk.IntVar()
 c1 = Tk.Checkbutton(CTL, text="Show img", variable = cVar1)
 c1.select()
-c1.grid(row=2, column=0 )
+c1.place(y=4,x=240)
 
 cVar2 = Tk.IntVar()
 c2 = Tk.Checkbutton(CTL, text="Show plt", variable = cVar2)
-c2.deselect()
-c2.grid(row=2, column=1 )
+#c2.select()
+c2.place(y=4,x=320)
 
-cVar3 = Tk.IntVar()
-c3 = Tk.Checkbutton(CTL, text="Save File", variable = cVar3)
-c3.deselect()
-c3.grid(row=2, column=2 )
-
-cVar4 = Tk.IntVar()
-c4 = Tk.Checkbutton(CTL, text="Show Info", variable = cVar4)
-c4.deselect()
-c4.grid(row=2, column=3 )
+"""
+btn3 = Tk.Button(CTL, text = "Show color plt", command = Show_Col_plt)
+btn3.grid(row=1, column=2)
 
 
 Lb1 = Tk.Listbox(CTL,width=40)
@@ -172,21 +124,24 @@ Lb1.grid(row=3, column=0 )
 for x in range(0, len(HSV_uniq)):
     Lb1.insert(x, HSV_uniq[x])
 
-
 Lb2 = Tk.Listbox(CTL,width=40)
 Lb2.grid(row=3, column=1 )
 
 
 print "Go loof"
 txt.focus_set()
-#CTL.geometry("450x100+0+0")
-#CTL.resizable(0, 0)
+"""
+w = 400 # width for the Tk root
+h = 500 # height for the Tk root
+ws = CTL.winfo_screenwidth() # width of the screen
+hs = CTL.winfo_screenheight() # height of the screen
+x = (ws/5) - (w/5)
+y = (hs/5) - (h/5)
+#CTL.geometry('%dx%d+%d+%d' % (w, h, x, y))
+CTL.geometry('%dx%d+100+100' % (w, h))
 CTL.mainloop()
 
 
-"""
-    
-"""
 """
 img_hsv = cv2.cvtColor(img_Org, cv2.COLOR_BGR2HSV)
 #img_hsv = img_hsv/256.
@@ -212,7 +167,6 @@ ax.zaxis.set_major_formatter(FormatStrFormatter('%.01f'))
 ax.set_xlabel('V')
 ax.set_ylabel('S')
 ax.set_zlabel('H')
-
 surf = ax.plot_surface(X[:,2], X[:,1], X[:,0], cmap=plt.cm.hsv, linewidth=1, antialiased=1)
 fig.colorbar(surf, shrink=0.6, aspect=10)
 """
