@@ -17,28 +17,6 @@ import Tkinter as Tk
 from tkinter import filedialog
 
 
-CTL = Tk.Tk()
-CTL.title("image K mean")
-
-
-filename =  filedialog.askopenfilename()
-if len(filename) is 0:
-    exit()
-print filename
-
-#img_Org = cv2.imread( "img3.bmp", cv2.COLOR_BGR2RGB )
-img_Org = cv2.imread( filename, cv2.COLOR_BGR2RGB )
-jpgheight, jpgwidth, jpgch = img_Org.shape
-HSV = np.zeros((jpgheight * jpgwidth, 3), np.float)
-RGB = np.zeros((jpgheight * jpgwidth, 3), np.float)
-
-for y in range(0, jpgheight):
-    for x in range(0, jpgwidth):
-        HSV[x + (y * jpgwidth)] = rgb2hsv(img_Org[y, x, 2], img_Org[y, x, 1], img_Org[y, x, 0])
-        RGB[x + (y * jpgwidth)] = img_Org[y, x]
-print "File Ready "
-
-
 def func_KMeans_HSV(K,HSV,height,width):
     img_out = np.zeros((jpgheight, jpgwidth, 3), np.uint8)
     HSV_KMeans = np.zeros((jpgheight * jpgwidth, 3), np.float)
@@ -47,6 +25,11 @@ def func_KMeans_HSV(K,HSV,height,width):
     est.fit(HSV)
     labels = est.labels_
     CC = est.cluster_centers_
+
+    Lb2.delete(0, Lb2.size())
+    for x in range(0, len(CC)):
+        Lb2.insert(x,CC[x])
+
     for y in range(0, height):
         for x in range(0, width):
             HSV_KMeans[x + (y * width)] = CC[labels[x + (y * width)]]
@@ -55,7 +38,11 @@ def func_KMeans_HSV(K,HSV,height,width):
             img_out[y, x] = rgbVal
     cv2.imshow("img_Out", img_out)
 
+
+
+
 def func_KMeans_RGB(K,RGB,height,width):
+    """
     img_out = np.zeros((jpgheight, jpgwidth, 3), np.uint8)
     RGB_KMeans = np.zeros((jpgheight * jpgwidth, 3), np.float)
     est = KMeans(n_clusters=K)
@@ -69,6 +56,7 @@ def func_KMeans_RGB(K,RGB,height,width):
                              RGB_KMeans[x + (y * width), 2])
             img_out[y, x] = rgbVal
     cv2.imshow("img_Out", img_out)
+    """
 
 def Cal_Hsv():
     global jpgheight
@@ -91,6 +79,43 @@ def Cal_Rgb():
 
 def Show_Col_Info():
     print "ddd"
+
+
+
+
+
+""""""
+img_Org = cv2.imread( "img2.bmp", cv2.COLOR_BGR2RGB )
+"""
+filename =  filedialog.askopenfilename()
+if len(filename) is 0:
+    exit()
+print filename
+img_Org = cv2.imread( filename, cv2.COLOR_BGR2RGB )
+"""
+jpgheight, jpgwidth, jpgch = img_Org.shape
+HSV = np.zeros((jpgheight * jpgwidth, 3), np.float)
+RGB = np.zeros((jpgheight * jpgwidth, 3), np.float)
+
+for y in range(0, jpgheight):
+    for x in range(0, jpgwidth):
+        HSV[x + (y * jpgwidth)] = rgb2hsv(img_Org[y, x, 2], img_Org[y, x, 1], img_Org[y, x, 0])
+        RGB[x + (y * jpgwidth)] = img_Org[y, x]
+
+
+df = pd.DataFrame({"H": HSV[:, 0], "S": HSV[:, 1], "V": HSV[:, 2]})
+df2 = df.drop_duplicates()
+HSV_uniq = np.zeros((len(df2), 3), np.float)
+HSV_uniq[:, 0] = df2["H"]
+HSV_uniq[:, 1] = df2["S"]
+HSV_uniq[:, 2] = df2["V"]
+
+print "File Ready Ok"
+
+
+
+CTL = Tk.Tk()
+CTL.title("image K mean")
 
 lbl = Tk.Label(CTL, text="K")
 lbl.grid(row=0, column=0)
@@ -142,11 +167,15 @@ c4.deselect()
 c4.grid(row=2, column=3 )
 
 
-Lb1 = Listbox(top)
-Lb1.insert(1, "Python")
-Lb1.insert(2, "Perl")
+Lb1 = Tk.Listbox(CTL,width=40)
+Lb1.grid(row=3, column=0 )
+for x in range(0, len(HSV_uniq)):
+    Lb1.insert(x, HSV_uniq[x])
 
-Lb1.pack()
+
+Lb2 = Tk.Listbox(CTL,width=40)
+Lb2.grid(row=3, column=1 )
+
 
 print "Go loof"
 txt.focus_set()
@@ -156,12 +185,7 @@ CTL.mainloop()
 
 
 """
-    df = pd.DataFrame({"H": HSV[:,0], "S": HSV[:,1], "V": HSV[:,2], "G": GG})
-    df2 = df.drop_duplicates()
-    HSV_uniq = np.zeros((len(df2),3), np.float)
-    HSV_uniq[:,0] = df2["H"]
-    HSV_uniq[:,1] = df2["S"]
-    HSV_uniq[:,2] = df2["V"]
+    
 """
 """
 img_hsv = cv2.cvtColor(img_Org, cv2.COLOR_BGR2HSV)
