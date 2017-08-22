@@ -18,6 +18,8 @@ from tkinter import filedialog
 
 flagSimg=1
 flagSplt=0
+flagSave=0
+flagShist=0
 KCnt=0
 
 
@@ -28,7 +30,7 @@ def func_KMeans_HSV(K,HSV,width,height):
     global Km_Label
     global Km_Center
     global HSV_KMeans
-
+    global flagSave
     Km_Est = KMeans(n_clusters=K)
     Km_Est.fit(HSV)
     Label = Km_Est.labels_
@@ -55,6 +57,8 @@ def func_Show_Img_FromHSV(K_HSV, width,height):
             img_out[y, x] = hsv2rgb(K_HSV[y, x,0],K_HSV[y, x,1],K_HSV[y, x,2])
     cv2.imshow("Target", img_out)
     cv2.imshow("original", img_Org)
+    if flagSave == 1 :
+        cv2.imwrite('Target.bmp', img_out)
 
 def func_Show_Plt(K_HSV, width,height):
     global HSV
@@ -106,9 +110,13 @@ def Cal_Hsv():
 def Check_ChkBtn():
     global flagSimg
     global flagSplt
+    global flagSave
+    global flagShist
     flagSimg = cVar1.get()
     flagSplt = cVar2.get()
-    #print flagSimg,flagSplt
+    flagSave = cVar3.get()
+    flagShist = cVar4.get()
+
 
 def Check_ChkColor():
     global HSV
@@ -145,8 +153,6 @@ def Check_ChkColor():
             else :
                 HSV_Coltmp[y, x]=(0,0,0)
                 #print "none"
-
-
     if flagSimg == 1:
         func_Show_Img_FromHSV(HSV_Coltmp, jpgwidth, jpgheight)
 
@@ -206,9 +212,24 @@ c1.place(y=5,x=240)
 
 cVar2 = Tk.IntVar()
 c2 = Tk.Checkbutton(CTL, text="Show plt", variable = cVar2 , command = Check_ChkBtn)
-c2.select()
+#c2.select()
 c2.place(y=25,x=240)
 
+
+cVar3 = Tk.IntVar()
+c3 = Tk.Checkbutton(CTL, text="Save img", variable = cVar3 , command = Check_ChkBtn)
+#c3.select()
+c3.place(y=5,x=330)
+
+cVar4 = Tk.IntVar()
+c4 = Tk.Checkbutton(CTL, text="Show hist", variable = cVar4 , command = Check_ChkBtn)
+#c4.select()
+c4.place(y=25,x=330)
+
+flagSimg = cVar1.get()
+flagSplt = cVar2.get()
+flagSave = cVar3.get()
+flagShist = cVar4.get()
 
 Lb1 = Tk.Listbox(CTL,width=25 )
 Lb1.place(y=50,x=5)
